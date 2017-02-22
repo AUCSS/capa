@@ -13,7 +13,7 @@ def command(thing="unknown",*args):
 
     def run(thing):
         print("Running thing "+thing);
-        __import__(thing);
+        __import__("modules."+thing);
 
     print("Doing "+thing+" with args "+str(args));
     if thing=="unknown":
