@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+#
+# Something something license
+#
+
+def help(*args)
+	puts("Showing help");
+end
+
+def run(thing)
+	puts("Running #{thing}");
+	require("./"+thing+".rb");
+end
+
+def command(thing,*args)
+	puts("Doing #{thing} with args #{args}.");
+	send(thing,*args);
+end
+
+aliases = {
+	"-h":"help",
+	"-r":"run",
+	"--help":"help",
+	"--run":"run"
+};
+
+ARGV.each_with_index do|a,i|
+	if (aliases.key? a.to_sym)
+		next_arg = ARGV[i+1];
+		if ((!next_arg.nil?)&&(aliases.key? next_arg.to_sym))
+			command(aliases[a.to_sym]);
+		else
+			command(aliases[a.to_sym],next_arg);
+		end
+	else
+		puts("No");
+	end
+end

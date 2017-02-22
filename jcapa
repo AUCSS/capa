@@ -1,0 +1,42 @@
+#!/usr/bin/env node
+#
+# Something something license
+#
+
+var commands={
+	help:function(){
+		console.log("Showing help");
+	},
+	run:function(thing){
+		if (thing) require("./"+thing+".js");
+	}
+};
+
+function command(thing,args){
+	console.log("Doing %s with args %s",thing,args);
+	commands[thing].apply(this,args);
+}
+
+var aliases={
+	"-h":"help",
+	"-r":"run",
+	"--help":"help",
+	"--run":"run"
+};
+
+prompt = process.argv.slice(2);
+
+for (let g=0,glen=prompt.length;g<glen;g++){
+	let val=prompt[g];
+
+	if (val in aliases){
+		var next_arg = prompt[g+1];
+		if (next_arg in aliases){
+			command(aliases[prompt[g]]);
+		}else{
+			command(aliases[prompt[g]],[next_arg]);
+		}
+	}else{
+		console.log("No");
+	}
+}

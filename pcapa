@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+#
+# Some license text
+#
+
+import sys;
+
+prompt = sys.argv[1:];
+
+def command(thing="unknown",*args):
+    def help(*args):
+        print("Printing help");
+
+    def run(thing):
+        print("Running thing "+thing);
+        __import__(thing);
+
+    print("Doing "+thing+" with args "+str(args));
+    if thing=="unknown":
+        print("Unknown command");
+    else:
+        if thing in locals():
+            locals()[thing](*args);
+        else:
+            print("Unknown command!");
+
+aliases = {
+        "-h":           "help",
+        "-r":           "run",
+        "--help":       "help",
+        "--run":        "run",
+};
+
+skip = 0;
+
+for i, arg in enumerate(prompt):
+    if skip>0:
+        skip-=1;
+        continue;
+
+    if arg in aliases:
+
+        if (len(prompt)==i+1):
+            # last argument
+            command(aliases[arg]);
+        else:
+            # try if the next argument is a command or a parameter
+            next_arg = prompt[i+1];
+            if next_arg in aliases:
+                command(aliases[arg]);
+            else:
+                command(aliases[arg],next_arg);
+                skip = 1;
+    else:
+        # unknown command
+        command();
