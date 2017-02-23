@@ -7,9 +7,9 @@ def help(*args)
 	puts("Showing help");
 end
 
-def run(thing)
-	puts("Running #{thing}");
-	require("./"+thing+".rb");
+def run(thing,*args)
+	puts("Running #{thing} with args #{args}");
+	require("./modules/"+thing+".rb");
 end
 
 def command(thing,*args)
@@ -30,7 +30,7 @@ ARGV.each_with_index do|a,i|
 		if ((!next_arg.nil?)&&(aliases.key? next_arg.to_sym))
 			command(aliases[a.to_sym]);
 		else
-			command(aliases[a.to_sym],next_arg);
+			command(aliases[a.to_sym],*next_arg.split("\s"));
 		end
 	else
 		puts("No");
