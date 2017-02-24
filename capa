@@ -4,23 +4,34 @@
 # Licensed under GPLv3 - Check the file LICENSE for more information.
 #
 
+# Some global variables
+$version	= -1.0;
+$name		= "Capa";
+
 #
 # Require our source
 #
 
-# A basic console, tell what you think!
+# A basic console
 require("./src/console.rb");
-
 $console=Console.new();
 
-def help()
+def help(*)
 	$console.log("Showing help");
+	puts("#{$name} version #{$version}");
+	begin
+	stuff=File.read("./.git/refs/heads/master");
+	puts("On git commit: #{stuff}");
+	rescue => e
+		$console.error("Can't read git commit: #{e}");
+	end
+	puts("Help text");
 end
 
-def run(file)
+def run(file,*args)
 	path="./modules/#{file}.rb";
 	$console.log("Loading #{path}...");
-	load(path);
+	system(path,*args);
 end
 
 def getCommandsFromARGV()
