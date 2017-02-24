@@ -1,0 +1,92 @@
+#!/usr/bin/env ruby
+#
+# Capa - Capa: AUCSS Personal Assistant
+# Licensed under GPLv3 - Check the file LICENSE for more information.
+#
+
+#
+# Require our source
+#
+
+# A basic console, tell what you think!
+require("./src/console.rb");
+
+$console=Console.new();
+
+def help()
+	$console.log("Showing help");
+end
+
+def run(file)
+	path="./modules/#{file}.rb";
+	$console.log("Loading #{path}...");
+	load(path);
+end
+
+def getCommandsFromARGV()
+	# Parse through command line arguments and create a command list
+	# We do this in reverse because it makes more sense, bear with me.
+	clist=[];
+
+	# Here are the aliases which map to specific capa commands
+	aliases = {
+		"-h":"help",
+		"-r":"run",
+		"--help":"help",
+		"--run":"run"
+	};
+
+	cmdline=ARGV.reverse;
+
+	args=[];
+	cmdline.each_with_index do|a,i|
+		if (aliases.key? a.to_sym)
+			# If a is an alias, get all the gathered arguments
+			args=args.reverse; # reverse the arguments to get the original order
+			command=aliases[a.to_sym]; # get the command we need to run
+
+			$console.debug("Pushing #{command} with #{args} to command list");
+			# Push it to the command list!
+			clist.push({
+				command:command,
+				args:args
+			});
+
+			args=[];
+		else
+			$console.debug("Gathering #{a} to argument list");
+			args.push(a);
+		end
+
+		if (i == cmdline.size-1)
+			# We're doing our last loop
+			# Check if there are some lone arguments without a command.
+			# E.g. 'capa time +2h', we'd have ["+2h","time"] in our arguments.
+			# Interpret these as arguments to the command 'run'.
+			# This way we can say 'capa time' and still run time, it makes sense.
+			if not args.empty?
+				args=args.reverse; # reverse the arguments to get the original order
+				$console.debug("Last command RUN with #{args} to command list");
+				clist.push({
+					command:"run",
+					args:args
+				});
+
+				args=[];
+			end
+		end
+	end
+
+	# And now we reverse the whole command list to get the right order.
+	return clist.reverse;
+end
+
+# It's time to get some commands to run!
+commandlist=[];
+commandlist.push(*getCommandsFromARGV()); # Get all the commands from our arguments
+
+# Run the commands in our list, in order, of course!
+commandlist.each do|a|
+	$console.debug("Running command #{a}");
+	send(a[:command],*a[:args]);
+end
