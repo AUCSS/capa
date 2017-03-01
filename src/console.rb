@@ -58,12 +58,12 @@ class Console < BasicObject
 	# How different types are leveled, more important types have larger levels
 	@@levels={
 		"error":100,
-		"warn":50,
-		"info":10,
-		"log":1,
-		"debug":0,
-		"verbose":-10,
-		"veryverbose":-100
+		"warn":10,
+		"info":-10,
+		"log":-20,
+		"debug":-50,
+		"verbose":"-75",
+		"dump":-100
 	};
 
 	def initialize(level=0)

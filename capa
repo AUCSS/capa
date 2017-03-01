@@ -17,7 +17,7 @@ require("json");
 require("./src/console.rb");
 
 #sets the log level
-$console=Console.new(15);
+$console=Console.new();
 
 def help(*)
 	$console.log("Showing help");
