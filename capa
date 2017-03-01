@@ -29,11 +29,11 @@ def help(*)
 	puts("Help text");
 end
 
-def run(file,*args)
-	path="./run/#{file}.rb";
+def run(command,*args)
+	path="./run/#{command}.rb";
 	$console.log("Loading #{path}...");
-	ENV["test"]=JSON.generate(args);
-	load(path);
+	load(path)
+	send(command, args)
 end
 
 def getCommandsFromARGV()

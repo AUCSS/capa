@@ -5,10 +5,12 @@
 require("json");
 require("./lib/algebra.rb");
 
-algebra=Algebra.new();
+def math(input)
+	algebra=Algebra.new();
 
-args=JSON.parse(ENV["test"]);
+	args=input;
 
-args.each do |a|
-	algebra.solve(a);
+	args.each do |a|
+		algebra.solve(a);
+	end
 end
