@@ -8,9 +8,10 @@
 $version	= -1.0;
 $name		= "Capa";
 
-#
-# Require our source
-#
+# Set consistent working directory (the same directory as the file, regardless of where we run the script from)
+Dir.chdir(__dir__);
+
+require("json");
 
 # A basic console
 require("./src/console.rb");
@@ -29,9 +30,10 @@ def help(*)
 end
 
 def run(file,*args)
-	path="./modules/#{file}.rb";
+	path="./run/#{file}.rb";
 	$console.log("Loading #{path}...");
-	system(path,*args);
+	ENV["test"]=JSON.generate(args);
+	load(path);
 end
 
 def getCommandsFromARGV()
