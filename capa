@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
 #
-# Capa - Capa: AUCSS Personal Assistant
+# CAPA - CAPA: AUCSS Personal Assistant
 # Licensed under GPLv3 - Check the file LICENSE for more information.
 #
 
 # Some global variables
 $version	= -1.0;
-$name		= "Capa";
+$name		= "CAPA";
 
 # Set consistent working directory (the same directory as the file, regardless of where we run the script from)
 Dir.chdir(__dir__);
@@ -26,7 +26,7 @@ end
 
 # DEBUG: check if the first argument is -V (for BE VERBOSE DARNIT)
 if (ARGV[0]=="-V")
-	ARGV.shift();
+	ARGV.shift(); # remove -V
 	verbose(-1000);
 end
 
@@ -39,8 +39,7 @@ def getCommandsFromARGV()
 	aliases = {
 		"h":"help",
 		"r":"run",
-		"v":"verbose",
-		"V":"verbose"
+		"v":"verbose"
 	};
 
 	$console.debug("Reading commands from arguments");
