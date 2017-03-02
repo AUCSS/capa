@@ -21,12 +21,6 @@
 #	"LOG: %s" % "hello"
 #	> "LOG: hello"
 #
-# The most common log types are:
-# debug	-	Debugging, level 0
-# log	-	General purpose logging, level 1
-# info	-	Something that should stand out, informative, level 10
-# warn	-	Something not quite as expected, maybe should take a look, 50
-# error	-	Something went wrong! Action required! 100
 #
 
 $colors={
@@ -62,11 +56,18 @@ class Console < BasicObject
 		"info":-10,
 		"log":-20,
 		"debug":-50,
-		"verbose":"-75",
+		"verbose":-75,
 		"dump":-100
 	};
 
-	def initialize(level=0)
+	def level
+		@level
+	end
+	def level=(level)
+		@level=level
+	end
+
+	def initialize(level=1)
 		@formats=@@formats;
 		@levels=@@levels;
 
@@ -78,7 +79,7 @@ class Console < BasicObject
 	# These get printed out nevertheless, accessed method name is the type
 	def method_missing(type, *args, &block)
 		# If log level is not sufficient, we shall not log
-		if @levels[type]<@level then return; end
+		if @levels[type].to_i<@level then return; end
 
 		# If formatting for this type, format
 		if @formats.key? type.to_sym

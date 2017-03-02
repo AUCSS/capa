@@ -11,31 +11,23 @@ $name		= "Capa";
 # Set consistent working directory (the same directory as the file, regardless of where we run the script from)
 Dir.chdir(__dir__);
 
-require("json");
+# Require everything from our source folder
+Dir["./src/*.*"].each {
+	|file| require file
+}
 
-# A basic console
-require("./src/console.rb");
+# init the console (log level can be set by passing the number as a parameter here)
+$console=Console.new(0);
 
-#sets the log level
-$console=Console.new();
-
-def help(*)
-	$console.log("Showing help");
-	puts("#{$name} version #{$version}");
-	begin
-	stuff=File.read("./.git/refs/heads/master");
-	puts("On git commit: #{stuff}");
-	rescue => e
-		$console.error("Can't read git commit: #{e}");
-	end
-	puts("Help text");
+def verbose(level=-50)
+	$console.level+=level;
+	$console.log("Verbosity set to #{$console.level}");
 end
 
-def run(command,*args)
-	path="./run/#{command}.rb";
-	$console.log("Loading #{path}...");
-	load(path)
-	send(command, args)
+# DEBUG: check if the first argument is -V (for BE VERBOSE DARNIT)
+if (ARGV[0]=="-V")
+	ARGV.shift();
+	verbose(-1000);
 end
 
 def getCommandsFromARGV()
@@ -45,28 +37,79 @@ def getCommandsFromARGV()
 
 	# Here are the aliases which map to specific capa commands
 	aliases = {
-		"-h":"help",
-		"-r":"run",
-		"--help":"help",
-		"--run":"run"
+		"h":"help",
+		"r":"run",
+		"v":"verbose",
+		"V":"verbose"
 	};
+
+	$console.debug("Reading commands from arguments");
 
 	cmdline=ARGV.reverse;
 
 	args=[];
 	cmdline.each_with_index do|a,i|
-		if (aliases.key? a.to_sym)
-			# If a is an alias, get all the gathered arguments
-			args=args.reverse; # reverse the arguments to get the original order
-			command=aliases[a.to_sym]; # get the command we need to run
+		if (a[0]=="-")
+			# Capa now handles command line commands a bit smarter.
+			# If you use a single dash, you can combine commands together.
+			# Only the last command gets the arguments.
+			#
+			# For example, 'capa -vr time' will run time verbosely.
+			# 'capa -vvvv' will set the verbosity level to 4 times as verbose.
+			#
+			if (a[1]=="-")
+				if (a[2]=="-")
+					# Syntax error, --- and so on is not supported
+					$console.error("Syntax error: #{a}");
+				else
+					# Command as strict '--command'
+					$console.dump("#{a} is a doubledash (strict) command.");
+					command=a[2..-1]; # remove the dashes
+					
+					# push the command to the command list
+					clist.push({
+						command:command,
+						args:args
+					});
+				end
+			else
+				# split the rest and loop through, left to right, running the last one with arguments
+				$console.dump("#{a} is a single dash (lousy) command.");
+				aliaslist=a[1..-1].split(//);
 
-			$console.debug("Pushing #{command} with #{args} to command list");
-			# Push it to the command list!
-			clist.push({
-				command:command,
-				args:args
-			});
+				# Create a temporary command list for these commands - we need to reverse this in the end
+				_clist=[];
 
+				$console.dump("#{aliases}");
+				aliaslist.each_with_index	do |a,i|
+					# For each single-letter alias
+					if (aliases.key? a.to_sym)
+						command=aliases[a.to_sym]; # get the command we need to run
+
+						# we don't use 'args' as it belongs to the last alias
+						_args=[];
+
+						if (i==aliaslist.size-1)
+							# If this is the last alias
+							$console.dump("Last alias: #{a[-1]}");
+							_args=args.reverse; # reverse the arguments to get the original order
+						end
+
+						$console.debug("Pushing command '#{command}' with args #{_args} to command list");
+						# Push it to the command list!
+						_clist.push({
+							command:command,
+							args:_args
+						});
+					else
+						# Command starts with '-', not a key, thus it's an unknown command.
+						$console.warn("Unknown command '#{a}'!")
+					end
+				end
+
+				# Reverse the command list and push it to the actual command list
+				clist.push(*_clist.reverse);
+			end
 			args=[];
 		else
 			$console.debug("Gathering #{a} to argument list");
@@ -102,6 +145,7 @@ commandlist.push(*getCommandsFromARGV()); # Get all the commands from our argume
 
 # Run the commands in our list, in order, of course!
 commandlist.each do|a|
-	$console.debug("Running command #{a}");
+	$console.debug("Running command '#{a}' from command list");
+	$console.dump("send(#{a[:command]},*a[:args])");
 	send(a[:command],*a[:args]);
 end
