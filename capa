@@ -25,7 +25,7 @@ def verbose(level=-50)
 end
 
 # DEBUG: check if the first argument is -V (for BE VERBOSE DARNIT)
-if (ARGV[0]=="-V")
+if ((ARGV.size>0)&&(ARGV[0][0..2]=="-V"))
 	ARGV.shift(); # remove -V
 	verbose(-1000);
 end
@@ -39,7 +39,8 @@ def getCommandsFromARGV()
 	aliases = {
 		"h":"help",
 		"r":"run",
-		"v":"verbose"
+		"v":"verbose",
+		"p":"prompt"
 	};
 
 	$console.debug("Reading commands from arguments");
