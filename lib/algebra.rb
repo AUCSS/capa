@@ -30,23 +30,73 @@ def numeric?(string)
 	return ret;
 end
 
+class Operators
+	def +(*args)
+		$console.debug("Summing #{args}!");
+		return args.inject(0, :+);
+	end
+	def -(first,*args)
+		$console.debug("Subtracting #{args} from #{first}!");
+		return first-self.+(*args);
+	end
+end
+$operators=Operators.new();
+
 class Algebra
+	def calcpostfix(*post)
+		$console.debug("Execute postfix: #{post}");
+
+		stack=[];
+		
+		post.each do |t|
+			$console.dump("Token #{t}");
+			if ($operators.respond_to? t)
+				# do the operation with our stack
+				$console.dump("Our stack is #{stack}");
+
+				# FIXME: Currently everything has 2 arguments, however, with some functions (max(1,2,3,4)) it might be more.
+				popped=stack.pop(2);
+
+				# Send the popped array to the operator
+				$console.log("sym is #{t.to_sym}");
+				result=$operators.send(t,*popped);
+
+				# Push the result back in
+				$console.info("Math res: #{result}");
+				stack.push(result);
+			else
+				if (numeric? t)
+					# push the value onto the stack.
+					stack.push(t.to_i);
+				else
+					# cannot determine what the value is
+					$console.error("Cannot parse operator: #{t}!");
+				end
+			end
+		end
+		$console.dump("Our stack, after evaluation, is #{stack}");
+		if (stack.size==1)
+			return stack[0];
+		else
+			$console.warn("Stack contains more than 1 value!");
+		end
+	end
 	def solve(expr)
 		# TODO try to figure out where the boundaries are.
 		# e.g. "sin(2*5)" is not s*i*n(2*5), unfortunately, but abc might be a*b*c.
 		# and 25 is not 2*5
 		
 		expr=expr.gsub(/\s+/,""); # remove all whitespace
-		expr=expr.split(/\b/);    # split into an array by word boundaries
+		expr=expr.split(/\b/);    # split into an array by word boundaries (for now)
 
 		$console.debug("Expression: #{expr}");
 
-		infix2postfix(expr);
+		post=infix2postfix(expr);
+
+		return calcpostfix(*post);
 	end
 	def infix2postfix(input)
 		$console.log("Converting infix to postfix...");
-
-		operators=["+","-"];
 		
 		output=[];
 		operatorstack=[];
@@ -58,13 +108,13 @@ class Algebra
 				output.push(a);
 			else
 				# if a is an operator
-				if operators.include? a
+				if $operators.respond_to? a
 					$console.log("Pushing #{a}!");
 					output.push(*operatorstack);
 					operatorstack=[];
 					operatorstack.push(a);
 				else
-					$console.log("else");
+					$console.error("Syntax error: '#{a}' was not expected");
 				end
 			end
 		end

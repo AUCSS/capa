@@ -10,7 +10,11 @@ def math(input)
 
 	args=input;
 
+	results=[];
+
 	args.each do |a|
-		algebra.solve(a);
+		results.push(algebra.solve(a));
 	end
+
+	return results;
 end
