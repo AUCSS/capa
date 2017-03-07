@@ -30,17 +30,49 @@ def numeric?(string)
 	return ret;
 end
 
-class Operators
-	def +(*args)
-		$console.debug("Summing #{args}!");
-		return args.inject(0, :+);
+# FIXME: Someone tell me how to do this properly
+class Ops
+	def +(a,b)
+		$console.debug("Summing #{a} and #{b}!");
+		return a+b;
 	end
-	def -(first,*args)
-		$console.debug("Subtracting #{args} from #{first}!");
-		return first-self.+(*args);
+	def -(a,b)
+		$console.debug("Subtracting #{b} from #{a}!");
+		return a-b;
+	end
+	def *(a,b)
+		$console.debug("Multiplying #{a} and #{b}!");
+		return a*b;
+	end
+	def /(a,b)
+		$console.debug("Dividing #{a} by #{b}!");
+		return a/b;
 	end
 end
-$operators=Operators.new();
+$ops=Ops.new();
+$operators={
+	"priority":{
+		"(":1,
+		")":1,
+		"+":2,
+		"-":2,
+		"*":3,
+		"/":3
+	},
+	"associativity":{
+		# 00 - not associative, 01 - right, 10 - left, 11 - both
+		"+":2,
+		"-":2,
+		"*":2,
+		"/":2
+	},
+	"arguments":{
+		"+":2,
+		"-":2,
+		"*":2,
+		"/":2
+	}
+};
 
 class Algebra
 	def calcpostfix(*post)
@@ -49,17 +81,21 @@ class Algebra
 		stack=[];
 		
 		post.each do |t|
+			tsym = t.to_sym;
 			$console.dump("Token #{t}");
-			if ($operators.respond_to? t)
+			if ($ops.respond_to? t)
 				# do the operation with our stack
 				$console.dump("Our stack is #{stack}");
-
-				# FIXME: Currently everything has 2 arguments, however, with some functions (max(1,2,3,4)) it might be more.
-				popped=stack.pop(2);
+				
+				ar=$operators[:arguments][tsym];
+				$console.log("Operation arguments: #{ar}");
+				
+				# TODO: Handler for when there are not enough arguments!
+				popped=stack.pop(ar);
 
 				# Send the popped array to the operator
-				$console.log("sym is #{t.to_sym}");
-				result=$operators.send(t,*popped);
+				$console.log("sym is #{tsym}");
+				result=$ops.send(t,*popped);
 
 				# Push the result back in
 				$console.info("Math res: #{result}");
@@ -67,7 +103,7 @@ class Algebra
 			else
 				if (numeric? t)
 					# push the value onto the stack.
-					stack.push(t.to_i);
+					stack.push(t.to_f);
 				else
 					# cannot determine what the value is
 					$console.error("Cannot parse operator: #{t}!");
@@ -79,15 +115,21 @@ class Algebra
 			return stack[0];
 		else
 			$console.warn("Stack contains more than 1 value!");
+			return stack[0];
 		end
 	end
-	def solve(expr)
-		# TODO try to figure out where the boundaries are.
+	def boundaries(str)
+		# Try to figure out where the boundaries are.
 		# e.g. "sin(2*5)" is not s*i*n(2*5), unfortunately, but abc might be a*b*c.
 		# and 25 is not 2*5
 		
-		expr=expr.gsub(/\s+/,""); # remove all whitespace
-		expr=expr.split(/\b/);    # split into an array by word boundaries (for now)
+		# Consider this example. 2+2-(4*5)+20
+		# This needs to evaluate to [2, +, 2, -, (, 4, *, 5, ), +, 20]
+		return str.scan(/\d+(?:\.\d+)?|[\+\-\/\*\(\)]/);
+	end
+	def solve(string)
+		
+		expr=boundaries(string);
 
 		$console.debug("Expression: #{expr}");
 
@@ -99,28 +141,43 @@ class Algebra
 		$console.log("Converting infix to postfix...");
 		
 		output=[];
-		operatorstack=[];
+		opstack=[];
 
 		input.each do |a|
-			$console.debug(a);
-			# if a is a number
 			if numeric? a
 				output.push(a);
 			else
-				# if a is an operator
-				if $operators.respond_to? a
-					$console.log("Pushing #{a}!");
-					output.push(*operatorstack);
-					operatorstack=[];
-					operatorstack.push(a);
+				if a=="("
+					opstack.push(a);
 				else
-					$console.error("Syntax error: '#{a}' was not expected");
+					if a==")"
+						top = opstack.pop();
+						while (top!="(")
+							output.push(top);
+							top = opstack.pop();
+						end
+					else
+						# operator
+						# check priority
+						selfpriority = $operators[:priority][a.to_sym];
+						if !opstack.empty?
+							op=$operators[:priority][opstack[-1].to_sym]; 
+							$console.dump("IIit is #{opstack[-1]}");
+							$console.dump("Test if #{op} >= #{selfpriority}");
+							while (!opstack.empty? && $operators[:priority][opstack[-1].to_sym] >= selfpriority)
+								output.push(opstack.pop());
+							end
+						end
+
+						$console.dump("Pushing #{a}");
+						opstack.push(a);
+					end
 				end
 			end
 		end
 
-		operatorstack.each do |o|
-			output.push(o);
+		while !opstack.empty?
+			output.push(opstack.pop());
 		end
 
 		$console.log("Conversion complete! #{output}");

@@ -13,7 +13,13 @@ def math(input)
 	results=[];
 
 	args.each do |a|
-		results.push(algebra.solve(a));
+		result=algebra.solve(a);
+
+		if (result.to_i==result)
+			result=result.to_i
+		end
+		
+		results.push(result);
 	end
 
 	return results;
