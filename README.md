@@ -1,2 +1,2 @@
-# capa
-Capa: Aberdeen University Computing Science Society Personal Assistant
+# CAPA
+CAPA: Aberdeen University Computing Science Society Personal Assistant

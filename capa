@@ -65,7 +65,7 @@ def getCommandsFromARGV()
 					# Command as strict '--command'
 					$console.dump("#{a} is a doubledash (strict) command.");
 					command=a[2..-1]; # remove the dashes
-					
+
 					# push the command to the command list
 					clist.push({
 						command:command,
