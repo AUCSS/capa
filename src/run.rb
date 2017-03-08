@@ -11,8 +11,8 @@ def run(command,*args)
 	if File.file?(file) then	
 		load(file);
 	else
-		puts "Command #{command}, does not exist"
-		exit;
+		$console.error("Command #{command}, does not exist");
+		return;
 	end
 
 	$console.dump("send(#{command},#{args})");
