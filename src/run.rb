@@ -5,10 +5,15 @@
 #
 
 def run(command,*args)
-	path="./run/#{command}.rb";
+	file="./run/#{command}.rb";
 
-	$console.log("Running #{path} using ruby 'load'...");
-	load(path);
+	$console.log("Running #{file} using ruby 'load'...");
+	if File.file?(file) then	
+		load(file);
+	else
+		puts "Command #{command}, does not exist"
+		exit;
+	end
 
 	$console.dump("send(#{command},#{args})");
 	returns=send(command, *args);
