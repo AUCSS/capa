@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
-def time(input)
+# TODO: Fix the arguments to get only the first one
+def time(*input)
 	if !input.empty? then
 		o= input[0].split(":").to_a
 	else

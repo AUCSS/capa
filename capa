@@ -19,6 +19,9 @@ Dir["./src/*.*"].each {
 # init the console (log level can be set by passing the number as a parameter here)
 $console=Console.new(0);
 
+# init our data handler
+$data=DataHandler.new();
+
 def verbose(level=-50)
 	$console.level+=level;
 	$console.log("Verbosity set to #{$console.level}");

@@ -5,10 +5,8 @@
 require("json");
 require("./lib/algebra.rb");
 
-def math(input)
+def math(*args)
 	algebra=Algebra.new();
-
-	args=input;
 
 	results=[];
 

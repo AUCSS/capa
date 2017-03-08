@@ -11,7 +11,7 @@ def run(command,*args)
 	load(path);
 
 	$console.dump("send(#{command},#{args})");
-	returns=send(command, args);
+	returns=send(command, *args);
 
 	$console.debug("Command #{command} returned #{returns} (#{returns.class})");
 
