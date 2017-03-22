@@ -9,12 +9,9 @@ def prompt(*cmds)
 	# TODO: Some way to make the prompt non-blocking?
 	# The while loop currently stops everything else from executing.
 
-	while
-		cmdl=STDIN.gets().split();
-		cmd=cmdl[0];
-		args=cmdl[1..-1];
+	while true
 		begin
-			send(cmd,*args);
+			eval(STDIN.gets());
 		rescue => e
 			$console.error("Command error: #{e.to_s}");
 		end

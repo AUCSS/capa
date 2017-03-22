@@ -47,7 +47,7 @@ class Console < BasicObject
 		"error":$colors[:red]+"ERROR! %s"+$colors[:default],
 		"warn":$colors[:yellow]+"Warn! %s"+$colors[:default],
 		"info":$colors[:green]+"Info: %s"+$colors[:default],
-		"dump":$colors[:gray]+"  %s"+$colors[:default]
+		"dump":$colors[:darkgray]+"  %s"+$colors[:default]
 	};
 
 	# How different types are leveled, more important types have larger levels

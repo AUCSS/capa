@@ -22,6 +22,10 @@ $console=Console.new(0);
 # init our data handler
 $data=DataHandler.new();
 
+at_exit do
+	$data.save();
+end
+
 def verbose(level=-50)
 	$console.level+=level;
 	$console.log("Verbosity set to #{$console.level}");
@@ -106,7 +110,7 @@ def getCommandsFromARGV()
 						});
 					else
 						# Command starts with '-', not a key, thus it's an unknown command.
-						$console.warn("Unknown command '#{a}'!")
+						$console.error("Unknown command '#{a}'!")
 					end
 				end
 
@@ -149,6 +153,14 @@ commandlist.push(*getCommandsFromARGV()); # Get all the commands from our argume
 # Run the commands in our list, in order, of course!
 commandlist.each do|a|
 	$console.debug("Running command '#{a}' from command list");
-	$console.dump("send(#{a[:command]},*a[:args])");
-	send(a[:command],*a[:args]);
+	cmd = a[:command];
+	args = a[:args];
+	$console.dump("send(#{cmd},#{args})");
+	begin
+		send(cmd,*args);
+	rescue => e
+		$console.error("Cannot run command #{cmd}: #{e}");
+	end
 end
+
+$console.log("Done");
